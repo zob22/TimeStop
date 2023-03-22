@@ -17,14 +17,14 @@ class DrawerNavigationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30.0),
+        borderRadius: BorderRadius.circular(20),
       ),
       leading: Icon(iconData),
       onTap: onTap,
       title: Text(title),
-      selectedTileColor: Colors.blueAccent.shade100,
+      selectedTileColor: Colors.lightBlue.shade50.withOpacity(0.5),
       selected: selected,
-      selectedColor: Colors.black87,
+      selectedColor: Colors.black,
     );
   }
 }

@@ -1,16 +1,18 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:timestop/screens/settings_screen.dart';
+import 'package:timestop/widgets/background.dart';
 import 'package:timestop/widgets/drawer_nav.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomeScreenState extends State<HomeScreen> {
+  // Initialize with default value
   //Business logic
   int milliseconds = 0, seconds = 0, minutes = 0, hours = 0;
   String digitMilliseconds = "00",
@@ -29,9 +31,9 @@ class _MyHomePageState extends State<MyHomePage> {
     _scaffoldKey.currentState!.openDrawer();
   }
 
-  void _closeDrawer() {
-    Navigator.of(context).pop();
-  }
+  // void _closeDrawer() {
+  //   Navigator.of(context).pop();
+  // }
 
   //Stop timer function
   void stop() {
@@ -43,7 +45,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //Reset timer function
   void reset() {
-    timer!.cancel();
+    if (timer != null) {
+      timer!.cancel();
+    }
     setState(() {
       lapDisplay = false;
       milliseconds = 0;
@@ -140,14 +144,15 @@ class _MyHomePageState extends State<MyHomePage> {
   //Visual design
   @override
   Widget build(BuildContext context) {
+    final background = context.watch<Background>();
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.grey[900],
+      backgroundColor: background.selectedColor,
       drawer: Drawer(
-        backgroundColor: Colors.grey[900],
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: SafeArea(
+        backgroundColor: background.selectedColor,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -170,7 +175,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SettingsPage()),
+                      MaterialPageRoute(
+                          builder: (context) => SettingsScreen(
+                              selectedColor: background.selectedColor)),
                     );
                   },
                   selected: false,
@@ -245,7 +252,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: lapView(),
                   margin: const EdgeInsets.only(left: 8.0, right: 8.0),
                   decoration: BoxDecoration(
-                    color: Colors.grey[850],
+                    color: Colors.black.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: ListView.builder(
@@ -309,13 +316,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       decoration: const ShapeDecoration(
                         color: Color.fromARGB(255, 238, 238, 238),
                         shape: CircleBorder(),
-                        shadows: [
-                          BoxShadow(
-                            color: Colors.black,
-                            offset: Offset(5.0, 5.0),
-                            blurRadius: 10.0,
-                          )
-                        ],
                       ),
                       child: IconButton(
                         iconSize: 50.0,
@@ -336,13 +336,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       decoration: const ShapeDecoration(
                         color: Color.fromARGB(255, 238, 238, 238),
                         shape: CircleBorder(),
-                        shadows: [
-                          BoxShadow(
-                            color: Colors.black,
-                            offset: Offset(5.0, 5.0),
-                            blurRadius: 10.0,
-                          )
-                        ],
                       ),
                       child: IconButton(
                         iconSize: 70.0,
@@ -366,13 +359,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       decoration: const ShapeDecoration(
                         color: Color.fromARGB(255, 238, 238, 238),
                         shape: CircleBorder(),
-                        shadows: [
-                          BoxShadow(
-                            color: Colors.black,
-                            offset: Offset(5.0, 5.0),
-                            blurRadius: 10.0,
-                          )
-                        ],
                       ),
                       child: IconButton(
                         iconSize: 50.0,

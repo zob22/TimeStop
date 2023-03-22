@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:timestop/widgets/background.dart';
 import 'screens/home_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (_) => Background()),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -16,7 +20,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blueGrey, // Set primarySwatch to blueGrey
         brightness: Brightness.dark, // Set the brightness to dark
       ),
-      home: const MyHomePage(title: 'TimeStop'),
+      home: const HomeScreen(),
     );
   }
 }
