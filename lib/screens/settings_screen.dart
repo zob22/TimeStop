@@ -4,7 +4,7 @@ import 'package:timestop/widgets/background.dart';
 import 'package:timestop/widgets/color_dropdown.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key, required Color selectedColor});
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();

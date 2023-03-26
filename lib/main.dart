@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark, // Set the brightness to dark
       ),
       home: const HomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timestop/widgets/background.dart';
 
-class ColorDropdown extends StatelessWidget {
+class ColorDropdown extends StatefulWidget {
   const ColorDropdown({Key? key}) : super(key: key);
+  @override
+  State<ColorDropdown> createState() => _ColorDropdownState();
+}
+
+class _ColorDropdownState extends State<ColorDropdown> {
   @override
   Widget build(BuildContext context) {
     return Consumer<Background>(builder: (context, background, child) {
