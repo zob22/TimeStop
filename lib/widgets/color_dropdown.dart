@@ -18,6 +18,7 @@ class _ColorDropdownState extends State<ColorDropdown> {
           const Spacer(),
           DropdownButton(
             dropdownColor: background.selectedColor.withOpacity(0.8),
+            focusColor: background.selectedColor,
             value: background.selectedColor,
             items: background.colors.map((colorPreview) {
               return DropdownMenuItem(
