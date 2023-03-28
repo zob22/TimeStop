@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List laps = [];
   var startTime = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _scrollController = ScrollController();
 
   //Drawer open/close functions
   void _openDrawer() {
@@ -88,6 +89,13 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       lapDisplay = true;
       laps.add(lap);
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+      );
     });
   }
 
@@ -255,6 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: ListView.builder(
+                    controller: _scrollController,
                     itemCount: laps.length,
                     itemBuilder: (context, index) {
                       return Padding(
