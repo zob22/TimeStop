@@ -12,7 +12,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Initialize with default value
   //Business logic
   int milliseconds = 0, seconds = 0, minutes = 0, hours = 0;
   String digitMilliseconds = "00",
@@ -149,6 +148,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  //Stopwatch Text
+  TextStyle getCustomTextStyle(BuildContext context) {
+    return TextStyle(
+      color: Colors.grey[200],
+      fontSize: 50.0,
+      fontWeight: FontWeight.w600,
+    );
+  }
+
   //Visual design
   @override
   Widget build(BuildContext context) {
@@ -242,14 +250,60 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               //Stopwatch Time
               Center(
-                child: Text(
-                    "$digitHours:$digitMinutes:$digitSeconds:$digitMilliseconds",
-                    style: TextStyle(
-                      color: Colors.grey[200],
-                      fontSize: 50.0,
-                      fontWeight: FontWeight.w600,
-                    )),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 60.0,
+                      child: Text(
+                        digitHours,
+                        textAlign: TextAlign.center,
+                        style: getCustomTextStyle(context),
+                      ),
+                    ),
+                    Text(
+                      ":",
+                      textAlign: TextAlign.center,
+                      style: getCustomTextStyle(context),
+                    ),
+                    SizedBox(
+                      width: 60.0,
+                      child: Text(
+                        digitMinutes,
+                        textAlign: TextAlign.center,
+                        style: getCustomTextStyle(context),
+                      ),
+                    ),
+                    Text(
+                      ":",
+                      textAlign: TextAlign.center,
+                      style: getCustomTextStyle(context),
+                    ),
+                    SizedBox(
+                      width: 60.0,
+                      child: Text(
+                        digitSeconds,
+                        textAlign: TextAlign.center,
+                        style: getCustomTextStyle(context),
+                      ),
+                    ),
+                    Text(
+                      ":",
+                      textAlign: TextAlign.center,
+                      style: getCustomTextStyle(context),
+                    ),
+                    SizedBox(
+                      width: 60.0,
+                      child: Text(
+                        digitMilliseconds,
+                        textAlign: TextAlign.center,
+                        style: getCustomTextStyle(context),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+
               const SizedBox(
                 height: 20.0,
               ),
