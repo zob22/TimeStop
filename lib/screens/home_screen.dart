@@ -326,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         shape: CircleBorder(),
                       ),
                       child: IconButton(
-                        iconSize: 50.0,
+                        iconSize: MediaQuery.of(context).size.width * 0.14,
                         color: Colors.blue[200],
                         onPressed: () {
                           addLaps();
@@ -346,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         shape: CircleBorder(),
                       ),
                       child: IconButton(
-                        iconSize: 70.0,
+                        iconSize: MediaQuery.of(context).size.width * 0.18,
                         color:
                             (!started) ? Colors.green[300] : Colors.orange[300],
                         onPressed: () {
@@ -369,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         shape: CircleBorder(),
                       ),
                       child: IconButton(
-                        iconSize: 50.0,
+                        iconSize: MediaQuery.of(context).size.width * 0.14,
                         color: Colors.red[300],
                         onPressed: () {
                           reset();
