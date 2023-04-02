@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:timestop/screens/settings_screen.dart';
 import 'package:timestop/widgets/utils/color_options.dart';
@@ -398,6 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.blue[200],
                         onPressed: () {
                           addLaps();
+                          HapticFeedback.lightImpact();
                         },
                         icon: const Icon(Icons.flag),
                       ),
@@ -419,6 +421,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             (!started) ? Colors.green[300] : Colors.orange[300],
                         onPressed: () {
                           (!started) ? start() : stop();
+                          HapticFeedback.lightImpact();
                         },
                         icon: Icon(
                           (!started) ? Icons.play_arrow : Icons.pause,
@@ -442,6 +445,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () {
                           reset();
                           laps.clear();
+                          HapticFeedback.lightImpact();
                         },
                         icon: const Icon(
                           Icons.replay,
