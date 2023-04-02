@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:timestop/screens/settings_screen.dart';
-import 'package:timestop/widgets/background.dart';
+import 'package:timestop/widgets/utils/color_options.dart';
+import 'package:timestop/widgets/utils/time_format.dart';
 import 'package:timestop/widgets/drawer_nav.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,7 +14,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Initialize with default value
   //Business logic
   int milliseconds = 0, seconds = 0, minutes = 0, hours = 0;
   String digitMilliseconds = "00",
@@ -25,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List laps = [];
   var startTime = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _scrollController = ScrollController();
 
   //Drawer open/close functions
   void _openDrawer() {
@@ -89,6 +91,13 @@ class _HomeScreenState extends State<HomeScreen> {
       lapDisplay = true;
       laps.add(lap);
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   //Lap difference
@@ -141,15 +150,25 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  //Stopwatch Text
+  TextStyle getCustomTextStyle(BuildContext context, bool displayHours) {
+    return TextStyle(
+      color: Colors.grey[200],
+      fontSize: displayHours ? 60.0 : 70.0,
+      fontWeight: FontWeight.w600,
+    );
+  }
+
   //Visual design
   @override
   Widget build(BuildContext context) {
-    final background = context.watch<Background>();
+    final coloroption = context.watch<ColorOptions>();
+    final timeoption = context.watch<TimeFormat>();
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: background.selectedColor,
+      backgroundColor: coloroption.selectedColor,
       drawer: Drawer(
-        backgroundColor: background.selectedColor,
+        backgroundColor: coloroption.selectedColor,
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -234,14 +253,73 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               //Stopwatch Time
               Center(
-                child: Text(
-                    "$digitHours:$digitMinutes:$digitSeconds:$digitMilliseconds",
-                    style: TextStyle(
-                      color: Colors.grey[200],
-                      fontSize: 50.0,
-                      fontWeight: FontWeight.w600,
-                    )),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    timeoption.displayHours
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                                SizedBox(
+                                  width: 70.0,
+                                  child: Text(
+                                    digitHours,
+                                    textAlign: TextAlign.center,
+                                    style: getCustomTextStyle(
+                                        context, timeoption.displayHours),
+                                  ),
+                                ),
+                                Text(
+                                  ":",
+                                  textAlign: TextAlign.center,
+                                  style: getCustomTextStyle(
+                                      context, timeoption.displayHours),
+                                ),
+                              ])
+                        : const SizedBox.shrink(),
+                    SizedBox(
+                      width: timeoption.displayHours ? 70.0 : 100.0,
+                      child: Text(
+                        digitMinutes,
+                        textAlign: TextAlign.center,
+                        style: getCustomTextStyle(
+                            context, timeoption.displayHours),
+                      ),
+                    ),
+                    Text(
+                      ":",
+                      textAlign: TextAlign.center,
+                      style:
+                          getCustomTextStyle(context, timeoption.displayHours),
+                    ),
+                    SizedBox(
+                      width: timeoption.displayHours ? 70.0 : 100.0,
+                      child: Text(
+                        digitSeconds,
+                        textAlign: TextAlign.center,
+                        style: getCustomTextStyle(
+                            context, timeoption.displayHours),
+                      ),
+                    ),
+                    Text(
+                      ":",
+                      textAlign: TextAlign.center,
+                      style:
+                          getCustomTextStyle(context, timeoption.displayHours),
+                    ),
+                    SizedBox(
+                      width: timeoption.displayHours ? 70.0 : 100.0,
+                      child: Text(
+                        digitMilliseconds,
+                        textAlign: TextAlign.center,
+                        style: getCustomTextStyle(
+                            context, timeoption.displayHours),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+
               const SizedBox(
                 height: 20.0,
               ),
@@ -255,6 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: ListView.builder(
+                    controller: _scrollController,
                     itemCount: laps.length,
                     itemBuilder: (context, index) {
                       return Padding(
@@ -301,7 +380,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 (SizedBox(
                   height: timeView(),
                 )),
-
               const SizedBox(
                 height: 40.0,
               ),
@@ -317,10 +395,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         shape: CircleBorder(),
                       ),
                       child: IconButton(
-                        iconSize: 50.0,
+                        iconSize: MediaQuery.of(context).size.width * 0.14,
                         color: Colors.blue[200],
                         onPressed: () {
                           addLaps();
+                          HapticFeedback.lightImpact();
                         },
                         icon: const Icon(Icons.flag),
                       ),
@@ -337,11 +416,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         shape: CircleBorder(),
                       ),
                       child: IconButton(
-                        iconSize: 70.0,
+                        iconSize: MediaQuery.of(context).size.width * 0.18,
                         color:
                             (!started) ? Colors.green[300] : Colors.orange[300],
                         onPressed: () {
                           (!started) ? start() : stop();
+                          HapticFeedback.lightImpact();
                         },
                         icon: Icon(
                           (!started) ? Icons.play_arrow : Icons.pause,
@@ -360,11 +440,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         shape: CircleBorder(),
                       ),
                       child: IconButton(
-                        iconSize: 50.0,
+                        iconSize: MediaQuery.of(context).size.width * 0.14,
                         color: Colors.red[300],
                         onPressed: () {
                           reset();
                           laps.clear();
+                          HapticFeedback.lightImpact();
                         },
                         icon: const Icon(
                           Icons.replay,

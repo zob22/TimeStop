@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:timestop/widgets/background.dart';
+import 'package:timestop/widgets/utils/color_options.dart';
+import 'package:timestop/widgets/utils/time_format.dart';
 import 'screens/home_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
   runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (_) => Background()),
+    ChangeNotifierProvider(create: (_) => ColorOptions()),
+    ChangeNotifierProvider(create: (_) => TimeFormat()),
   ], child: const MyApp()));
 }
 
