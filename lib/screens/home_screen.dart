@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timestop/screens/settings_screen.dart';
-import 'package:timestop/widgets/background.dart';
+import 'package:timestop/widgets/utils/color_options.dart';
+import 'package:timestop/widgets/utils/time_format.dart';
 import 'package:timestop/widgets/drawer_nav.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -149,10 +150,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   //Stopwatch Text
-  TextStyle getCustomTextStyle(BuildContext context) {
+  TextStyle getCustomTextStyle(BuildContext context, bool displayHours) {
     return TextStyle(
       color: Colors.grey[200],
-      fontSize: 50.0,
+      fontSize: displayHours ? 60.0 : 70.0,
       fontWeight: FontWeight.w600,
     );
   }
@@ -160,12 +161,13 @@ class _HomeScreenState extends State<HomeScreen> {
   //Visual design
   @override
   Widget build(BuildContext context) {
-    final background = context.watch<Background>();
+    final coloroption = context.watch<ColorOptions>();
+    final timeoption = context.watch<TimeFormat>();
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: background.selectedColor,
+      backgroundColor: coloroption.selectedColor,
       drawer: Drawer(
-        backgroundColor: background.selectedColor,
+        backgroundColor: coloroption.selectedColor,
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -253,51 +255,64 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    timeoption.displayHours
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                                SizedBox(
+                                  width: 70.0,
+                                  child: Text(
+                                    digitHours,
+                                    textAlign: TextAlign.center,
+                                    style: getCustomTextStyle(
+                                        context, timeoption.displayHours),
+                                  ),
+                                ),
+                                Text(
+                                  ":",
+                                  textAlign: TextAlign.center,
+                                  style: getCustomTextStyle(
+                                      context, timeoption.displayHours),
+                                ),
+                              ])
+                        : const SizedBox.shrink(),
                     SizedBox(
-                      width: 60.0,
-                      child: Text(
-                        digitHours,
-                        textAlign: TextAlign.center,
-                        style: getCustomTextStyle(context),
-                      ),
-                    ),
-                    Text(
-                      ":",
-                      textAlign: TextAlign.center,
-                      style: getCustomTextStyle(context),
-                    ),
-                    SizedBox(
-                      width: 60.0,
+                      width: timeoption.displayHours ? 70.0 : 100.0,
                       child: Text(
                         digitMinutes,
                         textAlign: TextAlign.center,
-                        style: getCustomTextStyle(context),
+                        style: getCustomTextStyle(
+                            context, timeoption.displayHours),
                       ),
                     ),
                     Text(
                       ":",
                       textAlign: TextAlign.center,
-                      style: getCustomTextStyle(context),
+                      style:
+                          getCustomTextStyle(context, timeoption.displayHours),
                     ),
                     SizedBox(
-                      width: 60.0,
+                      width: timeoption.displayHours ? 70.0 : 100.0,
                       child: Text(
                         digitSeconds,
                         textAlign: TextAlign.center,
-                        style: getCustomTextStyle(context),
+                        style: getCustomTextStyle(
+                            context, timeoption.displayHours),
                       ),
                     ),
                     Text(
                       ":",
                       textAlign: TextAlign.center,
-                      style: getCustomTextStyle(context),
+                      style:
+                          getCustomTextStyle(context, timeoption.displayHours),
                     ),
                     SizedBox(
-                      width: 60.0,
+                      width: timeoption.displayHours ? 70.0 : 100.0,
                       child: Text(
                         digitMilliseconds,
                         textAlign: TextAlign.center,
-                        style: getCustomTextStyle(context),
+                        style: getCustomTextStyle(
+                            context, timeoption.displayHours),
                       ),
                     ),
                   ],
@@ -364,7 +379,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 (SizedBox(
                   height: timeView(),
                 )),
-
               const SizedBox(
                 height: 40.0,
               ),

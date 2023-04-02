@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Background with ChangeNotifier {
+class ColorOptions with ChangeNotifier {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   late Future<Color> storedColor = _getColorFromPrefs();
 
@@ -15,7 +15,7 @@ class Background with ChangeNotifier {
   ];
   Color _selectedColor = Colors.grey.shade900;
 
-  Background() {
+  ColorOptions() {
     storedColor.then((color) {
       _selectedColor = color;
       notifyListeners();

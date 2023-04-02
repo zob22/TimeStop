@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timestop/widgets/background.dart';
+import 'package:timestop/widgets/time_switch.dart';
+import 'package:timestop/widgets/utils/color_options.dart';
 import 'package:timestop/widgets/color_dropdown.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -13,13 +14,13 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
-    final background = context.watch<Background>();
+    final coloroption = context.watch<ColorOptions>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: background.selectedColor,
+        backgroundColor: coloroption.selectedColor,
       ),
-      backgroundColor: background.selectedColor,
+      backgroundColor: coloroption.selectedColor,
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -33,6 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             ColorDropdown(),
+            TimeSwitch(),
           ],
         ),
       ),
