@@ -6,6 +6,7 @@ import 'package:timestop/screens/settings_screen.dart';
 import 'package:timestop/widgets/utils/color_options.dart';
 import 'package:timestop/widgets/utils/time_format.dart';
 import 'package:timestop/widgets/drawer_nav.dart';
+import 'package:wakelock/wakelock.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -40,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   //Stop timer function
   void stop() {
     timer!.cancel();
+    Wakelock.disable();
     setState(() {
       started = false;
     });
@@ -50,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (timer != null) {
       timer!.cancel();
     }
+    Wakelock.disable();
     setState(() {
       lapDisplay = false;
       milliseconds = 0;
@@ -135,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
           localMilliseconds = 0;
         }
       }
-
+      Wakelock.enable();
       setState(() {
         milliseconds = localMilliseconds;
         seconds = localSeconds;
