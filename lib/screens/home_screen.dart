@@ -7,6 +7,7 @@ import 'package:timestop/widgets/utils/color_options.dart';
 import 'package:timestop/widgets/utils/time_format.dart';
 import 'package:timestop/widgets/drawer_nav.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:sprintf/sprintf.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   double drawerPadding = 16;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ScrollController _scrollController = ScrollController();
-  String versionInfo = "Version 0.7.0";
+  String versionInfo = "Version 0.7.5";
 
   //Stopwatch Variables
   bool lapDisplay = false;
@@ -27,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int milliseconds = 0, seconds = 0, minutes = 0, hours = 0;
   int initialTime = 0;
   List laps = [];
+  static const Duration _tenMilliseconds = Duration(milliseconds: 10);
+  static const String _doubleDigitFormat = '%02d';
   String digitMilliseconds = "00",
       digitSeconds = "00",
       digitMinutes = "00",
@@ -38,25 +41,44 @@ class _HomeScreenState extends State<HomeScreen> {
     _scaffoldKey.currentState!.openDrawer();
   }
 
-  // void _closeDrawer() {
-  //   Navigator.of(context).pop();
-  // }
-
-  //Stop timer function
-  void stop() {
-    timer!.cancel();
-    Wakelock.disable();
-    setState(() {
-      stopwatchRunning = false;
+  //Start Stopwatch function
+  void start() {
+    stopwatchRunning = true;
+    Wakelock.enable();
+    timer = Timer.periodic(_tenMilliseconds, (timer) {
+      if (++milliseconds > 99) {
+        milliseconds = 0;
+        if (++seconds > 59) {
+          seconds = 0;
+          if (++minutes > 59) {
+            minutes = 0;
+            if (++hours > 23) {
+              hours = 0;
+            }
+          }
+        }
+      }
+      setState(() {
+        digitMilliseconds = sprintf(_doubleDigitFormat, [milliseconds]);
+        digitSeconds = sprintf(_doubleDigitFormat, [seconds]);
+        digitMinutes = sprintf(_doubleDigitFormat, [minutes]);
+        digitHours = sprintf(_doubleDigitFormat, [hours]);
+      });
     });
   }
 
-  //Reset timer function
-  void reset() {
-    if (timer != null) {
-      timer!.cancel();
-    }
+  //Stop Stopwatch function
+  void stop() {
+    timer?.cancel();
     Wakelock.disable();
+    stopwatchRunning = false;
+  }
+
+  //Reset Stopwatch function
+  void reset() {
+    timer?.cancel();
+    Wakelock.disable();
+    stopwatchRunning = false;
     setState(() {
       lapDisplay = false;
       milliseconds = 0;
@@ -68,27 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
       digitSeconds = "00";
       digitMinutes = "00";
       digitHours = "00";
-
-      stopwatchRunning = false;
     });
-  }
-
-//Lap orientation
-  double lapView() {
-    if (MediaQuery.of(context).orientation == Orientation.portrait) {
-      return 350.0;
-    } else {
-      return 100.0;
-    }
-  }
-
-  double timeView() {
-    if (MediaQuery.of(context).orientation == Orientation.portrait &&
-        !lapDisplay) {
-      return 175.0;
-    } else {
-      return 0.0;
-    }
   }
 
   //Lap function
@@ -119,42 +121,22 @@ class _HomeScreenState extends State<HomeScreen> {
     return result;
   }
 
-  //Start timer function
-  void start() {
-    stopwatchRunning = true;
-    timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
-      int localMilliseconds = milliseconds + 1;
-      int localSeconds = seconds;
-      int localMinutes = minutes;
-      int localHours = hours;
+  //Lap orientation
+  double lapView() {
+    if (MediaQuery.of(context).orientation == Orientation.portrait) {
+      return 350.0;
+    } else {
+      return 100.0;
+    }
+  }
 
-      if (localMilliseconds > 99) {
-        if (localSeconds > 59) {
-          if (localMinutes > 59) {
-            localHours++;
-            localMinutes = 0;
-          } else {
-            localMinutes++;
-            localSeconds = 0;
-          }
-        } else {
-          localSeconds++;
-          localMilliseconds = 0;
-        }
-      }
-      Wakelock.enable();
-      setState(() {
-        milliseconds = localMilliseconds;
-        seconds = localSeconds;
-        minutes = localMinutes;
-        hours = localHours;
-        digitMilliseconds =
-            (milliseconds >= 10) ? "$milliseconds" : "0$milliseconds";
-        digitSeconds = (seconds >= 10) ? "$seconds" : "0$seconds";
-        digitMinutes = (minutes >= 10) ? "$minutes" : "0$minutes";
-        digitHours = (hours >= 10) ? "$hours" : "0$hours";
-      });
-    });
+  double timeView() {
+    if (MediaQuery.of(context).orientation == Orientation.portrait &&
+        !lapDisplay) {
+      return 175.0;
+    } else {
+      return 0.0;
+    }
   }
 
   //Stopwatch Text
