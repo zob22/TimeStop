@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   double drawerPadding = 16;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ScrollController _scrollController = ScrollController();
-  String versionInfo = "Version 0.7.5";
+  String versionInfo = "Version 0.7.6";
 
   //Stopwatch Variables
   bool lapDisplay = false;
@@ -162,7 +162,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: SingleChildScrollView(
             padding: EdgeInsets.all(drawerPadding),
             child: SizedBox(
-              height: MediaQuery.of(context).size.height - 2 * (drawerPadding),
+              height: MediaQuery.of(context).size.height -
+                  2 * (drawerPadding) -
+                  MediaQuery.of(context).padding.top,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
