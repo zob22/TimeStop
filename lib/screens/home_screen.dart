@@ -6,6 +6,7 @@ import 'package:timestop/screens/settings_screen.dart';
 import 'package:timestop/widgets/utils/color_options.dart';
 import 'package:timestop/widgets/utils/time_format.dart';
 import 'package:timestop/widgets/drawer_nav.dart';
+import 'package:wakelock/wakelock.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,19 +15,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  //Business logic
+  //Configuration Variables
+  double drawerPadding = 16;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _scrollController = ScrollController();
+  String versionInfo = "Version 0.7.0";
+
+  //Stopwatch Variables
+  bool lapDisplay = false;
+  bool stopwatchRunning = false;
   int milliseconds = 0, seconds = 0, minutes = 0, hours = 0;
+  int initialTime = 0;
+  List laps = [];
   String digitMilliseconds = "00",
       digitSeconds = "00",
       digitMinutes = "00",
       digitHours = "00";
   Timer? timer;
-  bool started = false;
-  bool lapDisplay = false;
-  List laps = [];
-  var startTime = 0;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final ScrollController _scrollController = ScrollController();
 
   //Drawer open/close functions
   void _openDrawer() {
@@ -40,8 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
   //Stop timer function
   void stop() {
     timer!.cancel();
+    Wakelock.disable();
     setState(() {
-      started = false;
+      stopwatchRunning = false;
     });
   }
 
@@ -50,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (timer != null) {
       timer!.cancel();
     }
+    Wakelock.disable();
     setState(() {
       lapDisplay = false;
       milliseconds = 0;
@@ -62,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
       digitMinutes = "00";
       digitHours = "00";
 
-      started = false;
+      stopwatchRunning = false;
     });
   }
 
@@ -114,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //Start timer function
   void start() {
-    started = true;
+    stopwatchRunning = true;
     timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       int localMilliseconds = milliseconds + 1;
       int localSeconds = seconds;
@@ -135,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
           localMilliseconds = 0;
         }
       }
-
+      Wakelock.enable();
       setState(() {
         milliseconds = localMilliseconds;
         seconds = localSeconds;
@@ -171,36 +178,50 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: coloroption.selectedColor,
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(
-                  height: 16.0,
-                ),
-                DrawerNavigationItem(
-                  iconData: Icons.schedule,
-                  title: "Stopwatch",
-                  onTap: () {},
-                  selected: true,
-                ),
-                const Divider(
-                  thickness: 1.0,
-                ),
-                DrawerNavigationItem(
-                  iconData: Icons.settings,
-                  title: "Settings",
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const SettingsScreen()),
-                    );
-                  },
-                  selected: false,
-                ),
-              ],
+            padding: EdgeInsets.all(drawerPadding),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height - 2 * (drawerPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    height: 16.0,
+                  ),
+                  DrawerNavigationItem(
+                    iconData: Icons.schedule,
+                    title: "Stopwatch",
+                    onTap: () {},
+                    selected: true,
+                  ),
+                  const Divider(
+                    thickness: 1.0,
+                  ),
+                  DrawerNavigationItem(
+                    iconData: Icons.settings,
+                    title: "Settings",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SettingsScreen()),
+                      );
+                    },
+                    selected: false,
+                  ),
+                  const Spacer(),
+                  ListTile(
+                    leading: const Icon(Icons.info),
+                    title: Text(
+                      versionInfo,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -417,14 +438,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: IconButton(
                         iconSize: MediaQuery.of(context).size.width * 0.18,
-                        color:
-                            (!started) ? Colors.green[300] : Colors.orange[300],
+                        color: (!stopwatchRunning)
+                            ? Colors.green[300]
+                            : Colors.orange[300],
                         onPressed: () {
-                          (!started) ? start() : stop();
+                          (!stopwatchRunning) ? start() : stop();
                           HapticFeedback.lightImpact();
                         },
                         icon: Icon(
-                          (!started) ? Icons.play_arrow : Icons.pause,
+                          (!stopwatchRunning) ? Icons.play_arrow : Icons.pause,
                         ),
                       ),
                     ),
