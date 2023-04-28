@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   double drawerPadding = 16;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ScrollController _scrollController = ScrollController();
-  String versionInfo = "Version 0.7.6";
+  String versionInfo = "Version 0.7.7";
 
   //Stopwatch Variables
   bool lapDisplay = false;
