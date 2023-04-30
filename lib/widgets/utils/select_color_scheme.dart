@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ColorOptions with ChangeNotifier {
+class SelectColorScheme with ChangeNotifier {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  late Future<Color> storedColor = _getColorFromPrefs();
 
-  final List<Color> _colors = [
+  final List<Color> _availableColors = [
     Colors.grey.shade900,
     Colors.pink.shade900,
     Colors.green.shade900,
@@ -13,31 +12,32 @@ class ColorOptions with ChangeNotifier {
     Colors.deepOrange.shade900,
     Colors.purple.shade900,
   ];
+
   Color _selectedColor = Colors.grey.shade900;
 
-  ColorOptions() {
-    storedColor.then((color) {
+  SelectColorScheme() {
+    getColorFromPrefs().then((color) {
       _selectedColor = color;
       notifyListeners();
     });
   }
 
-  List<Color> get colors => _colors;
+  List<Color> get availableColors => _availableColors;
   Color get selectedColor => _selectedColor;
 
-  Future<Color> _getColorFromPrefs() async {
+  Future<Color> getColorFromPrefs() async {
     final SharedPreferences prefs = await _prefs;
-    final int? colorInt = prefs.getInt('_selectedColor');
+    final int? colorInt = prefs.getInt('colorScheme');
     if (colorInt != null) {
       return Color(colorInt);
     }
     return Colors.grey.shade900;
   }
 
-  Future<void> setColor(Color colorVal) async {
+  Future<void> setColor(Color color) async {
     final SharedPreferences prefs = await _prefs;
-    _selectedColor = colorVal;
-    await prefs.setInt('_selectedColor', _selectedColor.value);
+    _selectedColor = color;
+    await prefs.setInt('colorScheme', _selectedColor.value);
     notifyListeners();
   }
 }

@@ -4,9 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:timestop/screens/settings_screen.dart';
-import 'package:timestop/widgets/utils/color_options.dart';
-import 'package:timestop/widgets/utils/time_format.dart';
-import 'package:timestop/widgets/utils/notification_status.dart';
+import 'package:timestop/widgets/utils/select_color_scheme.dart';
+import 'package:timestop/widgets/utils/select_time_format.dart';
+import 'package:timestop/widgets/utils/enable_notifications.dart';
 import 'package:timestop/widgets/drawer_nav.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:sprintf/sprintf.dart';
@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final int notificationId = 0;
   final ScrollController _scrollController = ScrollController();
-  String versionInfo = "Version 0.8.0";
+  String versionInfo = "Version 0.8.1";
 
   //Stopwatch Variables
   bool lapDisplay = false;
@@ -156,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
   TextStyle getCustomTextStyle(BuildContext context, bool displayHours) {
     return TextStyle(
       color: Colors.grey[200],
-      fontSize: displayHours ? 60.0 : 70.0,
+      fontSize: displayHours ? 60.0 : 75.0,
       fontWeight: FontWeight.w600,
     );
   }
@@ -214,14 +214,14 @@ class _HomeScreenState extends State<HomeScreen> {
   //Visual design
   @override
   Widget build(BuildContext context) {
-    final coloroption = context.watch<ColorOptions>();
-    final timeoption = context.watch<TimeFormat>();
-    final notificationOption = context.watch<NotificationStatus>();
+    final colorScheme = context.watch<SelectColorScheme>();
+    final timeFormat = context.watch<SelectTimeFormat>();
+    final notificationStatus = context.watch<EnableNotifications>();
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: coloroption.selectedColor,
+      backgroundColor: colorScheme.selectedColor,
       drawer: Drawer(
-        backgroundColor: coloroption.selectedColor,
+        backgroundColor: colorScheme.selectedColor,
         child: SafeArea(
           child: SingleChildScrollView(
             padding: EdgeInsets.all(drawerPadding),
@@ -320,73 +320,23 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(
                 height: timeView(),
               ),
+
               //Stopwatch Time
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    timeoption.displayHours
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                                SizedBox(
-                                  width: 70.0,
-                                  child: Text(
-                                    digitHours,
-                                    textAlign: TextAlign.center,
-                                    style: getCustomTextStyle(
-                                        context, timeoption.displayHours),
-                                  ),
-                                ),
-                                Text(
-                                  ":",
-                                  textAlign: TextAlign.center,
-                                  style: getCustomTextStyle(
-                                      context, timeoption.displayHours),
-                                ),
-                              ])
-                        : const SizedBox.shrink(),
-                    SizedBox(
-                      width: timeoption.displayHours ? 70.0 : 100.0,
-                      child: Text(
-                        digitMinutes,
-                        textAlign: TextAlign.center,
-                        style: getCustomTextStyle(
-                            context, timeoption.displayHours),
-                      ),
-                    ),
-                    Text(
-                      ":",
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      timeFormat.displayHours
+                          ? "$digitHours:$digitMinutes:$digitSeconds:$digitMilliseconds"
+                          : "$digitMinutes:$digitSeconds:$digitMilliseconds",
                       textAlign: TextAlign.center,
                       style:
-                          getCustomTextStyle(context, timeoption.displayHours),
+                          getCustomTextStyle(context, timeFormat.displayHours),
                     ),
-                    SizedBox(
-                      width: timeoption.displayHours ? 70.0 : 100.0,
-                      child: Text(
-                        digitSeconds,
-                        textAlign: TextAlign.center,
-                        style: getCustomTextStyle(
-                            context, timeoption.displayHours),
-                      ),
-                    ),
-                    Text(
-                      ":",
-                      textAlign: TextAlign.center,
-                      style:
-                          getCustomTextStyle(context, timeoption.displayHours),
-                    ),
-                    SizedBox(
-                      width: timeoption.displayHours ? 70.0 : 100.0,
-                      child: Text(
-                        digitMilliseconds,
-                        textAlign: TextAlign.center,
-                        style: getCustomTextStyle(
-                            context, timeoption.displayHours),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
 
               const SizedBox(
@@ -491,7 +441,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             : Colors.orange[300],
                         onPressed: () {
                           (!stopwatchRunning)
-                              ? start(notificationOption)
+                              ? start(notificationStatus)
                               : stop();
                           HapticFeedback.lightImpact();
                         },
@@ -515,7 +465,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         iconSize: MediaQuery.of(context).size.width * 0.14,
                         color: Colors.red[300],
                         onPressed: () {
-                          reset(notificationOption);
+                          reset(notificationStatus);
                           laps.clear();
                           HapticFeedback.lightImpact();
                         },

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class NotificationStatus with ChangeNotifier {
+class EnableNotifications with ChangeNotifier {
   late final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   late bool enableNotification = false;
 
-  NotificationStatus() {
-    _getNotificationStatusFromPrefs().then((status) {
+  EnableNotifications() {
+    getNotificationStatusFromPrefs().then((status) {
       enableNotification = status ?? false;
       notifyListeners();
     });
   }
 
-  Future<bool?> _getNotificationStatusFromPrefs() async {
+  Future<bool?> getNotificationStatusFromPrefs() async {
     final SharedPreferences prefs = await _prefs;
     return prefs.getBool('enableNotification');
   }
