@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timestop/widgets/utils/color_options.dart';
+import 'package:timestop/widgets/utils/select_color_scheme.dart';
 
 class ColorDropdown extends StatefulWidget {
   const ColorDropdown({Key? key}) : super(key: key);
@@ -11,11 +11,11 @@ class ColorDropdown extends StatefulWidget {
 class _ColorDropdownState extends State<ColorDropdown> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<ColorOptions>(
-      builder: (context, coloroption, child) {
+    return Consumer<SelectColorScheme>(
+      builder: (context, colorScheme, child) {
         //Create a list of DropdownMenuItem widgets based on the colors defined in the colorscheme object.
         final colorItems = [
-          for (final colorPreview in coloroption.colors)
+          for (final colorPreview in colorScheme.availableColors)
             DropdownMenuItem(
               value: colorPreview,
               child: Container(
@@ -39,12 +39,12 @@ class _ColorDropdownState extends State<ColorDropdown> {
             const Text('Color scheme'),
             const Spacer(),
             DropdownButton(
-              dropdownColor: coloroption.selectedColor.withOpacity(0.8),
-              focusColor: coloroption.selectedColor,
-              value: coloroption.selectedColor,
+              dropdownColor: colorScheme.selectedColor.withOpacity(0.8),
+              focusColor: colorScheme.selectedColor,
+              value: colorScheme.selectedColor,
               items: colorItems,
               onChanged: (value) {
-                coloroption.setColor(value!);
+                colorScheme.setColor(value!);
               },
             ),
           ],

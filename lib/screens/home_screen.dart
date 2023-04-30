@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:timestop/screens/settings_screen.dart';
-import 'package:timestop/widgets/utils/color_options.dart';
-import 'package:timestop/widgets/utils/time_format.dart';
+import 'package:timestop/widgets/utils/select_color_scheme.dart';
+import 'package:timestop/widgets/utils/select_time_format.dart';
+import 'package:timestop/widgets/utils/enable_notifications.dart';
 import 'package:timestop/widgets/drawer_nav.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:sprintf/sprintf.dart';
@@ -18,9 +20,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   //Configuration Variables
   double drawerPadding = 16;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final int notificationId = 0;
   final ScrollController _scrollController = ScrollController();
-  String versionInfo = "Version 0.7.7";
+  String versionInfo = "Version 0.8.1";
 
   //Stopwatch Variables
   bool lapDisplay = false;
@@ -42,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   //Start Stopwatch function
-  void start() {
+  void start(notificationOption) {
     stopwatchRunning = true;
     Wakelock.enable();
     timer = Timer.periodic(_tenMilliseconds, (timer) {
@@ -64,6 +69,11 @@ class _HomeScreenState extends State<HomeScreen> {
         digitMinutes = sprintf(_doubleDigitFormat, [minutes]);
         digitHours = sprintf(_doubleDigitFormat, [hours]);
       });
+      if (notificationOption.enableNotification == true) {
+        _showNotification('$digitHours:$digitMinutes:$digitSeconds');
+      } else {
+        flutterLocalNotificationsPlugin.cancel(notificationId);
+      }
     });
   }
 
@@ -75,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   //Reset Stopwatch function
-  void reset() {
+  void reset(notificationOption) {
     timer?.cancel();
     Wakelock.disable();
     stopwatchRunning = false;
@@ -91,6 +101,9 @@ class _HomeScreenState extends State<HomeScreen> {
       digitMinutes = "00";
       digitHours = "00";
     });
+    if (notificationOption.enableNotification == true) {
+      flutterLocalNotificationsPlugin.cancel(notificationId);
+    }
   }
 
   //Lap function
@@ -143,21 +156,72 @@ class _HomeScreenState extends State<HomeScreen> {
   TextStyle getCustomTextStyle(BuildContext context, bool displayHours) {
     return TextStyle(
       color: Colors.grey[200],
-      fontSize: displayHours ? 60.0 : 70.0,
+      fontSize: displayHours ? 60.0 : 75.0,
       fontWeight: FontWeight.w600,
     );
+  }
+
+  //Notification Widget
+  Future<void> _showNotification(String time) async {
+    // Create a notification channel.
+    var androidDetails = const AndroidNotificationDetails(
+      'stopwatch_channel',
+      'Stopwatch',
+      importance: Importance.defaultImportance,
+      priority: Priority.low,
+      showWhen: false,
+      enableVibration: false,
+      enableLights: false,
+      playSound: false,
+    );
+
+    // Request Android permissions.
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestPermission();
+
+    // Create an IOS notification channel
+    var iOSDetails = const DarwinNotificationDetails();
+
+    //define local variables
+    var notificationDetails =
+        NotificationDetails(android: androidDetails, iOS: iOSDetails);
+
+    // Show a notification
+    await flutterLocalNotificationsPlugin.show(
+      notificationId,
+      'Stopwatch',
+      'Current time: $time',
+      notificationDetails,
+      payload: 'stopwatch_notifications',
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    var initializationSettingsAndroid =
+        const AndroidInitializationSettings('@drawable/ic_notification');
+    var initializationSettingsIOS = const DarwinInitializationSettings();
+    var initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   //Visual design
   @override
   Widget build(BuildContext context) {
-    final coloroption = context.watch<ColorOptions>();
-    final timeoption = context.watch<TimeFormat>();
+    final colorScheme = context.watch<SelectColorScheme>();
+    final timeFormat = context.watch<SelectTimeFormat>();
+    final notificationStatus = context.watch<EnableNotifications>();
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: coloroption.selectedColor,
+      backgroundColor: colorScheme.selectedColor,
       drawer: Drawer(
-        backgroundColor: coloroption.selectedColor,
+        backgroundColor: colorScheme.selectedColor,
         child: SafeArea(
           child: SingleChildScrollView(
             padding: EdgeInsets.all(drawerPadding),
@@ -256,73 +320,23 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(
                 height: timeView(),
               ),
+
               //Stopwatch Time
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    timeoption.displayHours
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                                SizedBox(
-                                  width: 70.0,
-                                  child: Text(
-                                    digitHours,
-                                    textAlign: TextAlign.center,
-                                    style: getCustomTextStyle(
-                                        context, timeoption.displayHours),
-                                  ),
-                                ),
-                                Text(
-                                  ":",
-                                  textAlign: TextAlign.center,
-                                  style: getCustomTextStyle(
-                                      context, timeoption.displayHours),
-                                ),
-                              ])
-                        : const SizedBox.shrink(),
-                    SizedBox(
-                      width: timeoption.displayHours ? 70.0 : 100.0,
-                      child: Text(
-                        digitMinutes,
-                        textAlign: TextAlign.center,
-                        style: getCustomTextStyle(
-                            context, timeoption.displayHours),
-                      ),
-                    ),
-                    Text(
-                      ":",
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      timeFormat.displayHours
+                          ? "$digitHours:$digitMinutes:$digitSeconds:$digitMilliseconds"
+                          : "$digitMinutes:$digitSeconds:$digitMilliseconds",
                       textAlign: TextAlign.center,
                       style:
-                          getCustomTextStyle(context, timeoption.displayHours),
+                          getCustomTextStyle(context, timeFormat.displayHours),
                     ),
-                    SizedBox(
-                      width: timeoption.displayHours ? 70.0 : 100.0,
-                      child: Text(
-                        digitSeconds,
-                        textAlign: TextAlign.center,
-                        style: getCustomTextStyle(
-                            context, timeoption.displayHours),
-                      ),
-                    ),
-                    Text(
-                      ":",
-                      textAlign: TextAlign.center,
-                      style:
-                          getCustomTextStyle(context, timeoption.displayHours),
-                    ),
-                    SizedBox(
-                      width: timeoption.displayHours ? 70.0 : 100.0,
-                      child: Text(
-                        digitMilliseconds,
-                        textAlign: TextAlign.center,
-                        style: getCustomTextStyle(
-                            context, timeoption.displayHours),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
 
               const SizedBox(
@@ -426,7 +440,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? Colors.green[300]
                             : Colors.orange[300],
                         onPressed: () {
-                          (!stopwatchRunning) ? start() : stop();
+                          (!stopwatchRunning)
+                              ? start(notificationStatus)
+                              : stop();
                           HapticFeedback.lightImpact();
                         },
                         icon: Icon(
@@ -449,7 +465,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         iconSize: MediaQuery.of(context).size.width * 0.14,
                         color: Colors.red[300],
                         onPressed: () {
-                          reset();
+                          reset(notificationStatus);
                           laps.clear();
                           HapticFeedback.lightImpact();
                         },
