@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timestop/widgets/utils/color_options.dart';
+import 'package:timestop/widgets/utils/notification_status.dart';
 import 'package:timestop/widgets/utils/time_format.dart';
 import 'screens/home_screen.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +9,7 @@ void main() {
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => ColorOptions()),
     ChangeNotifierProvider(create: (_) => TimeFormat()),
+    ChangeNotifierProvider(create: (_) => NotificationStatus()),
   ], child: const MyApp()));
 }
 

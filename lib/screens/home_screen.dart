@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:timestop/screens/settings_screen.dart';
 import 'package:timestop/widgets/utils/color_options.dart';
 import 'package:timestop/widgets/utils/time_format.dart';
+import 'package:timestop/widgets/utils/notification_status.dart';
 import 'package:timestop/widgets/drawer_nav.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:sprintf/sprintf.dart';
@@ -18,9 +20,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   //Configuration Variables
   double drawerPadding = 16;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final int notificationId = 0;
   final ScrollController _scrollController = ScrollController();
-  String versionInfo = "Version 0.7.7";
+  String versionInfo = "Version 0.8.0";
 
   //Stopwatch Variables
   bool lapDisplay = false;
@@ -42,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   //Start Stopwatch function
-  void start() {
+  void start(notificationOption) {
     stopwatchRunning = true;
     Wakelock.enable();
     timer = Timer.periodic(_tenMilliseconds, (timer) {
@@ -64,6 +69,11 @@ class _HomeScreenState extends State<HomeScreen> {
         digitMinutes = sprintf(_doubleDigitFormat, [minutes]);
         digitHours = sprintf(_doubleDigitFormat, [hours]);
       });
+      if (notificationOption.enableNotification == true) {
+        _showNotification('$digitHours:$digitMinutes:$digitSeconds');
+      } else {
+        flutterLocalNotificationsPlugin.cancel(notificationId);
+      }
     });
   }
 
@@ -75,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   //Reset Stopwatch function
-  void reset() {
+  void reset(notificationOption) {
     timer?.cancel();
     Wakelock.disable();
     stopwatchRunning = false;
@@ -91,6 +101,9 @@ class _HomeScreenState extends State<HomeScreen> {
       digitMinutes = "00";
       digitHours = "00";
     });
+    if (notificationOption.enableNotification == true) {
+      flutterLocalNotificationsPlugin.cancel(notificationId);
+    }
   }
 
   //Lap function
@@ -148,11 +161,62 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  //Notification Widget
+  Future<void> _showNotification(String time) async {
+    // Create a notification channel.
+    var androidDetails = const AndroidNotificationDetails(
+      'stopwatch_channel',
+      'Stopwatch',
+      importance: Importance.defaultImportance,
+      priority: Priority.low,
+      showWhen: false,
+      enableVibration: false,
+      enableLights: false,
+      playSound: false,
+    );
+
+    // Request Android permissions.
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestPermission();
+
+    // Create an IOS notification channel
+    var iOSDetails = const DarwinNotificationDetails();
+
+    //define local variables
+    var notificationDetails =
+        NotificationDetails(android: androidDetails, iOS: iOSDetails);
+
+    // Show a notification
+    await flutterLocalNotificationsPlugin.show(
+      notificationId,
+      'Stopwatch',
+      'Current time: $time',
+      notificationDetails,
+      payload: 'stopwatch_notifications',
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    var initializationSettingsAndroid =
+        const AndroidInitializationSettings('@drawable/ic_notification');
+    var initializationSettingsIOS = const DarwinInitializationSettings();
+    var initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
   //Visual design
   @override
   Widget build(BuildContext context) {
     final coloroption = context.watch<ColorOptions>();
     final timeoption = context.watch<TimeFormat>();
+    final notificationOption = context.watch<NotificationStatus>();
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: coloroption.selectedColor,
@@ -426,7 +490,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? Colors.green[300]
                             : Colors.orange[300],
                         onPressed: () {
-                          (!stopwatchRunning) ? start() : stop();
+                          (!stopwatchRunning)
+                              ? start(notificationOption)
+                              : stop();
                           HapticFeedback.lightImpact();
                         },
                         icon: Icon(
@@ -449,7 +515,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         iconSize: MediaQuery.of(context).size.width * 0.14,
                         color: Colors.red[300],
                         onPressed: () {
-                          reset();
+                          reset(notificationOption);
                           laps.clear();
                           HapticFeedback.lightImpact();
                         },

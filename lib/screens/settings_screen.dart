@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timestop/widgets/notification_switch.dart';
 import 'package:timestop/widgets/time_switch.dart';
 import 'package:timestop/widgets/utils/color_options.dart';
 import 'package:timestop/widgets/color_dropdown.dart';
@@ -35,6 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             ColorDropdown(),
             TimeSwitch(),
+            NotificationSwitch(),
           ],
         ),
       ),
