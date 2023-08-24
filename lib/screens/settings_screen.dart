@@ -24,9 +24,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: colorScheme.selectedColor,
       body: Container(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const <Widget>[
+          children: <Widget>[
             Text(
               'Appearance',
               style: TextStyle(

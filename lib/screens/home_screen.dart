@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final int notificationId = 0;
   final ScrollController _scrollController = ScrollController();
-  String versionInfo = "Version 0.8.1";
+  String versionInfo = "Version 0.8.2";
 
   //Stopwatch Variables
   bool lapDisplay = false;
